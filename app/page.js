@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Button, Stack, TextField } from "@mui/material";
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 export default function Home() {
   const [messages, setMessages] = useState([
@@ -24,14 +24,14 @@ export default function Home() {
   }, [messages]);
 
   const sendMessage = async () => {
-    if (!message.trim() || isLoading) return; // Don't send empty messages or send while loading
+    if (!message.trim() || isLoading) return;
     setIsLoading(true);
 
-    setMessage(""); // Clear the input field
+    setMessage("");
     setMessages((messages) => [
       ...messages,
-      { role: "user", content: message }, // Add the user's message to the chat
-      { role: "assistant", content: "" }, // Add a placeholder for the assistant's response
+      { role: "user", content: message },
+      { role: "assistant", content: "" },
     ]);
 
     try {
@@ -131,7 +131,7 @@ export default function Home() {
               </Box>
             </Box>
           ))}
-          <div ref={messagesEndRef} />
+          <div ref={messagesEndRef} /> {/* Scroll to bottom anchor */}
         </Stack>
         <Stack direction={"row"} spacing={2}>
           <TextField
