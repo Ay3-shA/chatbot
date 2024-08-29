@@ -2,17 +2,13 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Steps to run:
+In terminal:
+1. npm install
+2. npm install @mui/material @emotion/react @emotion/styled
+3. npm install dotenv
+4. Create .env.local file in the directory and pull up the open router API key.
+   The format should be like: OPENROUTER_API_KEY="YOUR-API-KEY"
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
