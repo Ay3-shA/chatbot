@@ -1,37 +1,42 @@
-"use client";
+// app/page.js
 
-import { Box, Button, Stack, TextField } from "@mui/material";
-import { useRef, useEffect, useState } from "react";
+"use client"; // Ensure this file is client-side only
 
-export default function Home() {
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content:
-        "Hi! I'm the Headstarter support assistant. How can I help you today?",
-    },
-  ]);
-  const [message, setMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+import { Box, Button, Stack, TextField, CircularProgress } from '@mui/material';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import withAuth from './hoc/withAuth';
+
+function useScrollToBottom(messages) {
   const messagesEndRef = useRef(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const sendMessage = async () => {
+  return messagesEndRef;
+}
+
+function Home() {
+  const [messages, setMessages] = useState([
+    { role: 'assistant', content: "Hi! I'm the Headstarter support assistant. How can I help you today?" },
+  ]);
+  const [message, setMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useScrollToBottom(messages);
+
+  const sendMessage = useCallback(async () => {
     if (!message.trim() || isLoading) return;
     setIsLoading(true);
+    setMessage('');
 
+    setMessage("");
     setMessages((messages) => [
       ...messages,
-      { role: "user", content: message },
-      { role: "assistant", content: "" },
-    ]);
+      { role: 'user', content: message },
+      { role: 'assistant', content: '...' },
+    ];
+
+    setMessages(newMessages);
 
     try {
       const response = await fetch("/api/chat", {
@@ -39,38 +44,49 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ content: message }), // Correct payload structure
+        body: JSON.stringify([...messages, { role: "user", content: message }]),
       });
 
       if (!response.ok) {
         throw new Error("Network response was not ok");
       }
 
-      const { reply } = await response.json();
-      setMessages((messages) => [
-        ...messages,
-        { role: "assistant", content: reply },
-      ]);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const text = decoder.decode(value, { stream: true });
+        setMessages((messages) => {
+          let lastMessage = messages[messages.length - 1];
+          let otherMessages = messages.slice(0, messages.length - 1);
+          return [
+            ...otherMessages,
+            { ...lastMessage, content: lastMessage.content + text },
+          ];
+        });
+      }
     } catch (error) {
       console.error("Error:", error);
       setMessages((messages) => [
-        ...messages,
-        {
-          role: "assistant",
-          content:
-            "I'm sorry, but I encountered an error. Please try again later.",
-        },
+        ...messages.slice(0, messages.length - 1), // Remove the typing indicator if an error occurs
+        { role: 'assistant', content: 'Sorry, something went wrong.' },
       ]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [message, isLoading, messages]);
 
   const handleKeyPress = (event) => {
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       sendMessage();
     }
+  };
+
+  const clearContext = () => {
+    setMessages([{ role: 'assistant', content: "Context reset. How can I assist you now?" }]);
   };
 
   return (
@@ -81,64 +97,96 @@ export default function Home() {
       flexDirection="column"
       justifyContent="center"
       alignItems="center"
+      bgcolor="#121212" // Dark background
+      color="#FFFFFF"   // Light text for better contrast
     >
       <Stack
-        direction={"column"}
+        direction={'column'}
         width="500px"
         height="700px"
-        border="1px solid black"
+        bgcolor="#1E1E1E" // Darker background for the chat area
+        borderRadius="12px"
+        boxShadow="0 4px 12px rgba(0, 0, 0, 0.1)"
         p={2}
         spacing={3}
+        border="1px solid #333" // Subtle border
       >
         <Stack
-          direction={"column"}
+          direction={'column'}
           spacing={2}
           flexGrow={1}
           overflow="auto"
           maxHeight="100%"
+          px={1}
+          py={2}
         >
           {messages.map((message, index) => (
             <Box
               key={index}
               display="flex"
               justifyContent={
-                message.role === "assistant" ? "flex-start" : "flex-end"
+                message.role === 'assistant' ? 'flex-start' : 'flex-end'
               }
+              mb={2}
             >
               <Box
                 bgcolor={
-                  message.role === "assistant"
-                    ? "primary.main"
-                    : "secondary.main"
+                  message.role === 'assistant'
+                    ? '#007AFF'  // Blue for assistant messages
+                    : '#4CAF50'  // Green for user messages
                 }
                 color="white"
                 borderRadius={16}
-                p={3}
+                p={2}
+                maxWidth="75%" // Limit the width of the messages
+                boxShadow="0 2px 8px rgba(0, 0, 0, 0.2)"
               >
                 {message.content}
               </Box>
             </Box>
           ))}
-          <div ref={messagesEndRef} /> {/* Scroll to bottom anchor */}
+          <div ref={messagesEndRef} />
         </Stack>
-        <Stack direction={"row"} spacing={2}>
+        <Stack direction={'row'} spacing={2} pt={1}>
           <TextField
-            label="Message"
+            label="Type your message here…"
+            variant="outlined"
             fullWidth
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isLoading}
+            InputProps={{
+              style: { color: '#FFFFFF', backgroundColor: '#333' }, // Darker input field
+            }}
+            InputLabelProps={{
+              style: { color: '#BBBBBB' }, // Light label color
+            }}
           />
           <Button
             variant="contained"
+            color="primary"
             onClick={sendMessage}
             disabled={isLoading}
+            style={{ minWidth: '100px', padding: '12px' }}
           >
-            {isLoading ? "Sending..." : "Send"}
+            {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Send'}
+          </Button>
+        </Stack>
+        <Stack direction={'row'} spacing={2} pt={1}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={clearContext}
+            style={{ minWidth: '100px', padding: '12px' }}
+          >
+            Clear Context
           </Button>
         </Stack>
       </Stack>
     </Box>
   );
 }
+
+
+export default withAuth(Home);
