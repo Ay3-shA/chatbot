@@ -2,15 +2,15 @@
 
 "use client"; // Ensure this file is client-side only
 
-import { Box, Button, Stack, TextField, CircularProgress } from '@mui/material';
-import { useState, useRef, useEffect, useCallback } from 'react';
-import withAuth from './hoc/withAuth';
+import { Box, Button, Stack, TextField, CircularProgress } from "@mui/material";
+import { useState, useRef, useEffect, useCallback } from "react";
+import withAuth from "./hoc/withAuth";
 
 function useScrollToBottom(messages) {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   return messagesEndRef;
@@ -18,23 +18,27 @@ function useScrollToBottom(messages) {
 
 function Home() {
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hi! I'm the Headstarter support assistant. How can I help you today?" },
+    {
+      role: "assistant",
+      content:
+        "Hi! I'm the Headstarter support assistant. How can I help you today?",
+    },
   ]);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useScrollToBottom(messages);
 
   const sendMessage = useCallback(async () => {
     if (!message.trim() || isLoading) return;
     setIsLoading(true);
-    setMessage('');
+    setMessage("");
 
     setMessage("");
     setMessages((messages) => [
       ...messages,
-      { role: 'user', content: message },
-      { role: 'assistant', content: '...' },
-    ];
+      { role: "user", content: message },
+      { role: "assistant", content: "..." },
+    ]);
 
     setMessages(newMessages);
 
@@ -71,7 +75,7 @@ function Home() {
       console.error("Error:", error);
       setMessages((messages) => [
         ...messages.slice(0, messages.length - 1), // Remove the typing indicator if an error occurs
-        { role: 'assistant', content: 'Sorry, something went wrong.' },
+        { role: "assistant", content: "Sorry, something went wrong." },
       ]);
     } finally {
       setIsLoading(false);
@@ -79,14 +83,19 @@ function Home() {
   }, [message, isLoading, messages]);
 
   const handleKeyPress = (event) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       sendMessage();
     }
   };
 
   const clearContext = () => {
-    setMessages([{ role: 'assistant', content: "Context reset. How can I assist you now?" }]);
+    setMessages([
+      {
+        role: "assistant",
+        content: "Context reset. How can I assist you now?",
+      },
+    ]);
   };
 
   return (
@@ -98,10 +107,10 @@ function Home() {
       justifyContent="center"
       alignItems="center"
       bgcolor="#121212" // Dark background
-      color="#FFFFFF"   // Light text for better contrast
+      color="#FFFFFF" // Light text for better contrast
     >
       <Stack
-        direction={'column'}
+        direction={"column"}
         width="500px"
         height="700px"
         bgcolor="#1E1E1E" // Darker background for the chat area
@@ -112,7 +121,7 @@ function Home() {
         border="1px solid #333" // Subtle border
       >
         <Stack
-          direction={'column'}
+          direction={"column"}
           spacing={2}
           flexGrow={1}
           overflow="auto"
@@ -125,15 +134,15 @@ function Home() {
               key={index}
               display="flex"
               justifyContent={
-                message.role === 'assistant' ? 'flex-start' : 'flex-end'
+                message.role === "assistant" ? "flex-start" : "flex-end"
               }
               mb={2}
             >
               <Box
                 bgcolor={
-                  message.role === 'assistant'
-                    ? '#007AFF'  // Blue for assistant messages
-                    : '#4CAF50'  // Green for user messages
+                  message.role === "assistant"
+                    ? "#007AFF" // Blue for assistant messages
+                    : "#4CAF50" // Green for user messages
                 }
                 color="white"
                 borderRadius={16}
@@ -147,7 +156,7 @@ function Home() {
           ))}
           <div ref={messagesEndRef} />
         </Stack>
-        <Stack direction={'row'} spacing={2} pt={1}>
+        <Stack direction={"row"} spacing={2} pt={1}>
           <TextField
             label="Type your message here…"
             variant="outlined"
@@ -157,10 +166,10 @@ function Home() {
             onKeyPress={handleKeyPress}
             disabled={isLoading}
             InputProps={{
-              style: { color: '#FFFFFF', backgroundColor: '#333' }, // Darker input field
+              style: { color: "#FFFFFF", backgroundColor: "#333" }, // Darker input field
             }}
             InputLabelProps={{
-              style: { color: '#BBBBBB' }, // Light label color
+              style: { color: "#BBBBBB" }, // Light label color
             }}
           />
           <Button
@@ -168,17 +177,21 @@ function Home() {
             color="primary"
             onClick={sendMessage}
             disabled={isLoading}
-            style={{ minWidth: '100px', padding: '12px' }}
+            style={{ minWidth: "100px", padding: "12px" }}
           >
-            {isLoading ? <CircularProgress size={24} color="inherit" /> : 'Send'}
+            {isLoading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              "Send"
+            )}
           </Button>
         </Stack>
-        <Stack direction={'row'} spacing={2} pt={1}>
+        <Stack direction={"row"} spacing={2} pt={1}>
           <Button
             variant="outlined"
             color="secondary"
             onClick={clearContext}
-            style={{ minWidth: '100px', padding: '12px' }}
+            style={{ minWidth: "100px", padding: "12px" }}
           >
             Clear Context
           </Button>
@@ -187,6 +200,5 @@ function Home() {
     </Box>
   );
 }
-
 
 export default withAuth(Home);
