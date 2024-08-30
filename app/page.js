@@ -4,7 +4,6 @@
 
 import { Box, Button, Stack, TextField, CircularProgress } from "@mui/material";
 import { useState, useRef, useEffect, useCallback } from "react";
-import withAuth from "./hoc/withAuth";
 
 function useScrollToBottom(messages) {
   const messagesEndRef = useRef(null);
@@ -33,14 +32,12 @@ function Home() {
     setIsLoading(true);
     setMessage("");
 
-    setMessage("");
-    setMessages((messages) => [
-      ...messages,
+    // Update the messages state with the user’s message and a typing indicator
+    setMessages((prevMessages) => [
+      ...prevMessages,
       { role: "user", content: message },
       { role: "assistant", content: "..." },
     ]);
-
-    setMessages(newMessages);
 
     try {
       const response = await fetch("/api/chat", {
@@ -62,9 +59,11 @@ function Home() {
         const { done, value } = await reader.read();
         if (done) break;
         const text = decoder.decode(value, { stream: true });
-        setMessages((messages) => {
-          let lastMessage = messages[messages.length - 1];
-          let otherMessages = messages.slice(0, messages.length - 1);
+
+        // Update the last message with the received text
+        setMessages((prevMessages) => {
+          let lastMessage = prevMessages[prevMessages.length - 1];
+          let otherMessages = prevMessages.slice(0, prevMessages.length - 1);
           return [
             ...otherMessages,
             { ...lastMessage, content: lastMessage.content + text },
@@ -73,8 +72,8 @@ function Home() {
       }
     } catch (error) {
       console.error("Error:", error);
-      setMessages((messages) => [
-        ...messages.slice(0, messages.length - 1), // Remove the typing indicator if an error occurs
+      setMessages((prevMessages) => [
+        ...prevMessages.slice(0, prevMessages.length - 1), // Remove the typing indicator if an error occurs
         { role: "assistant", content: "Sorry, something went wrong." },
       ]);
     } finally {
@@ -201,4 +200,4 @@ function Home() {
   );
 }
 
-export default withAuth(Home);
+export default Home;
