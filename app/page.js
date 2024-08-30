@@ -1,7 +1,4 @@
-// app/page.js
-
-"use client"; // Ensure this file is client-side only
-
+"use client";
 import { Box, Button, Stack, TextField, CircularProgress } from "@mui/material";
 import { useState, useRef, useEffect, useCallback } from "react";
 
@@ -32,9 +29,8 @@ function Home() {
     setIsLoading(true);
     setMessage("");
 
-    // Update the messages state with the user’s message and a typing indicator
-    setMessages((prevMessages) => [
-      ...prevMessages,
+    setMessages((messages) => [
+      ...messages,
       { role: "user", content: message },
       { role: "assistant", content: "..." },
     ]);
@@ -55,25 +51,30 @@ function Home() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
 
+      let assistantResponse = "";
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const text = decoder.decode(value, { stream: true });
+        assistantResponse += text;
 
-        // Update the last message with the received text
-        setMessages((prevMessages) => {
-          let lastMessage = prevMessages[prevMessages.length - 1];
-          let otherMessages = prevMessages.slice(0, prevMessages.length - 1);
-          return [
-            ...otherMessages,
-            { ...lastMessage, content: lastMessage.content + text },
-          ];
-        });
+        // Update the most recent assistant message
+        setMessages((messages) => [
+          ...messages.slice(0, -1),
+          { role: "assistant", content: assistantResponse },
+        ]);
       }
+
+      // Final update to ensure full response is set
+      setMessages((messages) => [
+        ...messages.slice(0, -1),
+        { role: "assistant", content: assistantResponse },
+      ]);
     } catch (error) {
       console.error("Error:", error);
-      setMessages((prevMessages) => [
-        ...prevMessages.slice(0, prevMessages.length - 1), // Remove the typing indicator if an error occurs
+      setMessages((messages) => [
+        ...messages.slice(0, -1),
         { role: "assistant", content: "Sorry, something went wrong." },
       ]);
     } finally {
@@ -88,15 +89,6 @@ function Home() {
     }
   };
 
-  const clearContext = () => {
-    setMessages([
-      {
-        role: "assistant",
-        content: "Context reset. How can I assist you now?",
-      },
-    ]);
-  };
-
   return (
     <Box
       width="100vw"
@@ -105,19 +97,19 @@ function Home() {
       flexDirection="column"
       justifyContent="center"
       alignItems="center"
-      bgcolor="#121212" // Dark background
-      color="#FFFFFF" // Light text for better contrast
+      bgcolor="#121212"
+      color="#FFFFFF"
     >
       <Stack
         direction={"column"}
         width="500px"
         height="700px"
-        bgcolor="#1E1E1E" // Darker background for the chat area
+        bgcolor="#1E1E1E"
         borderRadius="12px"
         boxShadow="0 4px 12px rgba(0, 0, 0, 0.1)"
         p={2}
         spacing={3}
-        border="1px solid #333" // Subtle border
+        border="1px solid #333"
       >
         <Stack
           direction={"column"}
@@ -139,14 +131,12 @@ function Home() {
             >
               <Box
                 bgcolor={
-                  message.role === "assistant"
-                    ? "#007AFF" // Blue for assistant messages
-                    : "#4CAF50" // Green for user messages
+                  message.role === "assistant" ? "#007AFF" : "#4CAF50"
                 }
                 color="white"
                 borderRadius={16}
                 p={2}
-                maxWidth="75%" // Limit the width of the messages
+                maxWidth="75%"
                 boxShadow="0 2px 8px rgba(0, 0, 0, 0.2)"
               >
                 {message.content}
@@ -165,10 +155,10 @@ function Home() {
             onKeyPress={handleKeyPress}
             disabled={isLoading}
             InputProps={{
-              style: { color: "#FFFFFF", backgroundColor: "#333" }, // Darker input field
+              style: { color: "#FFFFFF", backgroundColor: "#333" },
             }}
             InputLabelProps={{
-              style: { color: "#BBBBBB" }, // Light label color
+              style: { color: "#BBBBBB" },
             }}
           />
           <Button
@@ -183,16 +173,6 @@ function Home() {
             ) : (
               "Send"
             )}
-          </Button>
-        </Stack>
-        <Stack direction={"row"} spacing={2} pt={1}>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={clearContext}
-            style={{ minWidth: "100px", padding: "12px" }}
-          >
-            Clear Context
           </Button>
         </Stack>
       </Stack>
