@@ -98,13 +98,13 @@ function Home() {
       justifyContent="center"
       alignItems="center"
       bgcolor="#121212"
-      color="#FFFFFF"
+      color="hashtag#FFFFFF"
     >
       <Stack
         direction={"column"}
         width="500px"
         height="700px"
-        bgcolor="#1E1E1E"
+        bgcolor="hashtag#1E1E1E"
         borderRadius="12px"
         boxShadow="0 4px 12px rgba(0, 0, 0, 0.1)"
         p={2}
@@ -131,7 +131,9 @@ function Home() {
             >
               <Box
                 bgcolor={
-                  message.role === "assistant" ? "#007AFF" : "#4CAF50"
+                  message.role === "assistant"
+                    ? "hashtag#007AFF"
+                    : "hashtag#4CAF50"
                 }
                 color="white"
                 borderRadius={16}
@@ -155,10 +157,10 @@ function Home() {
             onKeyPress={handleKeyPress}
             disabled={isLoading}
             InputProps={{
-              style: { color: "#FFFFFF", backgroundColor: "#333" },
+              style: { color: "hashtag#FFFFFF", backgroundColor: "#333" },
             }}
             InputLabelProps={{
-              style: { color: "#BBBBBB" },
+              style: { color: "hashtag#BBBBBB" },
             }}
           />
           <Button
