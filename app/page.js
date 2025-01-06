@@ -1,5 +1,12 @@
 "use client";
-import { Box, Button, Stack, TextField, CircularProgress } from "@mui/material";
+import {
+  Box,
+  Button,
+  Stack,
+  TextField,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 import { useState, useRef, useEffect, useCallback } from "react";
 
 function useScrollToBottom(messages) {
@@ -59,14 +66,12 @@ function Home() {
         const text = decoder.decode(value, { stream: true });
         assistantResponse += text;
 
-        // Update the most recent assistant message
         setMessages((messages) => [
           ...messages.slice(0, -1),
           { role: "assistant", content: assistantResponse },
         ]);
       }
 
-      // Final update to ensure full response is set
       setMessages((messages) => [
         ...messages.slice(0, -1),
         { role: "assistant", content: assistantResponse },
@@ -97,19 +102,37 @@ function Home() {
       flexDirection="column"
       justifyContent="center"
       alignItems="center"
-      bgcolor="#121212"
-      color="hashtag#FFFFFF"
+      bgcolor="#0A0A0A"
+      p={2}
+      sx={{
+        backgroundImage: "linear-gradient(135deg, #1E1E1E 25%, #0A0A0A 100%)",
+        color: "#EDEDED",
+      }}
     >
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{ color: "#FFF", fontWeight: "bold", letterSpacing: 1.2 }}
+      >
+        Headstarter Support Assistant
+      </Typography>
       <Stack
         direction={"column"}
-        width="500px"
-        height="700px"
-        bgcolor="hashtag#1E1E1E"
-        borderRadius="12px"
-        boxShadow="0 4px 12px rgba(0, 0, 0, 0.1)"
-        p={2}
+        width={{ xs: "100%", sm: "500px" }}
+        height="70vh"
+        bgcolor="#2C2C2C"
+        borderRadius="16px"
+        boxShadow="0 8px 20px rgba(0, 0, 0, 0.3)"
+        p={3}
         spacing={3}
         border="1px solid #333"
+        sx={{
+          transition: "transform 0.3s ease, box-shadow 0.3s ease",
+          "&:hover": {
+            transform: "scale(1.02)",
+            boxShadow: "0 12px 24px rgba(0, 0, 0, 0.4)",
+          },
+        }}
       >
         <Stack
           direction={"column"}
@@ -119,6 +142,16 @@ function Home() {
           maxHeight="100%"
           px={1}
           py={2}
+          sx={{
+            scrollbarWidth: "thin",
+            "&::-webkit-scrollbar": {
+              width: "6px",
+            },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#555",
+              borderRadius: "10px",
+            },
+          }}
         >
           {messages.map((message, index) => (
             <Box
@@ -130,16 +163,19 @@ function Home() {
               mb={2}
             >
               <Box
-                bgcolor={
-                  message.role === "assistant"
-                    ? "hashtag#007AFF"
-                    : "hashtag#4CAF50"
-                }
+                bgcolor={message.role === "assistant" ? "#007AFF" : "#4CAF50"}
                 color="white"
                 borderRadius={16}
                 p={2}
                 maxWidth="75%"
-                boxShadow="0 2px 8px rgba(0, 0, 0, 0.2)"
+                boxShadow="0 4px 12px rgba(0, 0, 0, 0.3)"
+                sx={{
+                  transform: "translateY(-4px)",
+                  transition: "transform 0.2s ease-in-out",
+                  "&:hover": {
+                    transform: "translateY(0)",
+                  },
+                }}
               >
                 {message.content}
               </Box>
@@ -150,17 +186,17 @@ function Home() {
         <Stack direction={"row"} spacing={2} pt={1}>
           <TextField
             label="Type your message here…"
-            variant="outlined"
+            variant="filled"
             fullWidth
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             disabled={isLoading}
             InputProps={{
-              style: { color: "hashtag#FFFFFF", backgroundColor: "#333" },
+              style: { color: "#FFFFFF", backgroundColor: "#3E3E3E" },
             }}
             InputLabelProps={{
-              style: { color: "hashtag#BBBBBB" },
+              style: { color: "#BBBBBB" },
             }}
           />
           <Button
@@ -168,7 +204,16 @@ function Home() {
             color="primary"
             onClick={sendMessage}
             disabled={isLoading}
-            style={{ minWidth: "100px", padding: "12px" }}
+            sx={{
+              minWidth: "120px",
+              padding: "10px 16px",
+              fontSize: "16px",
+              fontWeight: "bold",
+              backgroundColor: "#FF5722",
+              "&:hover": {
+                backgroundColor: "#FF3D00",
+              },
+            }}
           >
             {isLoading ? (
               <CircularProgress size={24} color="inherit" />
